@@ -1,5 +1,5 @@
 {
-  "name": "no-tone-profile",
+  "name": "tone-profile",
   "private": true,
   "type": "module",
   "description": "Generates the README, its banner and its stats card.",

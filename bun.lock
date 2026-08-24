@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "no-tone-profile",
+      "name": "tone-profile",
       "devDependencies": {
         "@types/bun": "^1.3.14",
         "typescript": "^7.0.2",

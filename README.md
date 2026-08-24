@@ -21,9 +21,7 @@ behind it, and the infrastructure both run on.
 
 <div align="center">
 
-<sub>The field behind the wordmark isn't a picture of my site's gradient, it
-*is* it, the same `renderField` run headlessly. The window is the one
-<code>ssh cv.tone.rip</code> draws. <a href="scripts/">Generated here</a>,
+<sub>README generated <a href="scripts/">here</a>,
 weekly.</sub>
 
 </div>

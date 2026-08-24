@@ -18,7 +18,7 @@
  */
 
 import { renderBanner } from "./lib/banner.js";
-import { CARD_WIDTH, renderCard } from "./lib/card.js";
+import { CARD_WIDTH, FIELD_RENDER, renderCard } from "./lib/card.js";
 import { fetchStats } from "./lib/github.js";
 import type { RampId } from "./lib/vendor/ramps.js";
 
@@ -30,18 +30,11 @@ const LOGIN = "no-tone";
    sample the same ramp, so they cannot disagree. */
 const RAMP: RampId = "glacier";
 
-/* The field is rendered to fit the band inside the card, at 1x.
- *
- * 1x rather than 2x because the field is deliberately soft - it is a
- * quarter-scale render upscaled, with no blur filter anywhere - so there is no
- * detail for a denser raster to preserve. It also keeps the base64 the card
- * embeds down to about 120 kB instead of 430 kB, twice over (dark and light),
- * which is the difference between a README that loads and one that does not.
- *
- * The wordmark is not in here; the card draws it as vectors, so the one
- * element that does need to be sharp is not paying for the field's softness.
- * These numbers must match card.ts's band. */
-const FIELD = { width: 432, height: 108 } as const;
+/* The card owns the field's resolution, because the card owns the band it has
+   to fill - see FIELD_RENDER in card.ts for why it is smaller than that band.
+   Derived rather than repeated here: two numbers that must match are two
+   numbers that will eventually not. */
+const FIELD = FIELD_RENDER;
 
 /** The alt text is a sentence a screen reader says, so "1 stars" is wrong. */
 function plural(count: number, noun: string): string {
@@ -143,7 +136,7 @@ const DISPLAY_WIDTH = CARD_WIDTH;
 const block = `<a href="https://tone.rip">
   <picture>
     <source media="(prefers-color-scheme: light)" srcset="assets/stats-light.svg">
-    <img alt="tone — ${plural(stats.repos, "public repo")} · ${plural(stats.stars, "star")} · ${plural(stats.followers, "follower")}" src="assets/stats-dark.svg" width="${DISPLAY_WIDTH}">
+    <img alt="tone stats: ${plural(stats.repos, "public repo")} · ${plural(stats.stars, "star")} · ${plural(stats.followers, "follower")}" src="assets/stats-dark.svg" width="${DISPLAY_WIDTH}">
   </picture>
 </a>`;
 

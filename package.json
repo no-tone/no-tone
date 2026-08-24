@@ -2,9 +2,10 @@
   "name": "tone-profile",
   "private": true,
   "type": "module",
-  "description": "Generates the README, its banner and its stats card.",
+  "description": "Generates the README, its stats card and the profile picture.",
   "scripts": {
     "generate": "bun run scripts/generate.ts",
+    "avatar": "bun run scripts/avatar.ts",
     "vendor": "bun run scripts/vendor.ts",
     "check-types": "tsc --noEmit"
   },

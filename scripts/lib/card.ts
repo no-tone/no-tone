@@ -66,22 +66,43 @@ const FONT =
 
 /* Authored at the size it is displayed at, 1:1.
  *
- * The first version was 760 wide and shown at 820, which was fine - then the
- * display width came down to 460 and everything scaled with it, putting
- * 15px type on screen at 9px. Vector text costs nothing to re-lay-out, so the
- * geometry moved instead of the scale factor: every number below is a real
- * pixel on the reader's screen, and the font sizes are chosen for that. */
-export const CARD_WIDTH = 460;
+ * This is the third width, and the reason it keeps moving is worth writing
+ * down: because the card is authored 1:1, changing the display width is not a
+ * zoom, it is a re-layout. 760-authored-shown-at-820 was fine. Dropping the
+ * display to 460 without touching the geometry put 15px type on screen at 9px,
+ * which is where "too small" came from - the card was not too small, the text
+ * inside it was. So every number below moves together, and the font sizes are
+ * chosen for the width rather than inherited from a previous one.
+ *
+ * 700 puts the row text at 14px, which is what GitHub sets its own body text
+ * at, so the card reads as part of the page rather than as a thumbnail of
+ * something. */
+export const CARD_WIDTH = 700;
 
-const PAD = 14;
-const TITLE_BAR = 32;
-const BAND_HEIGHT = 108;
-const ROW = 20;
-const KEY_WIDTH = 84;
+const PAD = 20;
+const TITLE_BAR = 44;
+const BAND_HEIGHT = 160;
+const ROW = 28;
+const KEY_WIDTH = 120;
 
-const SIZE_TITLE = 9.5;
-const SIZE_ROW = 11;
-const SIZE_SMALL = 9.5;
+const SIZE_TITLE = 12;
+const SIZE_ROW = 14;
+const SIZE_SMALL = 11.5;
+
+/* The resolution to render the field at, which is deliberately *not* the band
+ * it fills - the <image> element scales it, and 0.6x is invisible on something
+ * whose softness is the point (it is already a quarter-scale upscale, see
+ * banner.ts). Only the aspect ratio has to match, or `slice` would crop it.
+ *
+ * This is what keeps the embed affordable. At 1:1 the band would be 660x160,
+ * which is 105k pixels of grain - high-entropy, so it barely compresses - and
+ * that lands at roughly a quarter of a megabyte per file, twice, in every
+ * commit that touches the numbers. */
+const FIELD_SCALE = 0.6;
+export const FIELD_RENDER = {
+  width: Math.round((CARD_WIDTH - PAD * 2) * FIELD_SCALE),
+  height: Math.round(BAND_HEIGHT * FIELD_SCALE),
+} as const;
 
 /** XML-escape. Repository and language names come off an API. */
 function esc(text: string): string {
@@ -178,7 +199,7 @@ export function renderCard({
   const markY = Math.round(bandY + (BAND_HEIGHT - markHeight) / 2);
 
   const body: string[] = [];
-  let y = bandY + BAND_HEIGHT + 26;
+  let y = bandY + BAND_HEIGHT + 34;
 
   for (const row of rows) {
     body.push(
@@ -200,7 +221,7 @@ export function renderCard({
        is trying not to be. The legend carries the naming instead. */
     const barX = PAD + KEY_WIDTH;
     const barWidth = CARD_WIDTH - barX - PAD;
-    const barHeight = 8;
+    const barHeight = 10;
     const gap = 2;
 
     let offset = 0;
@@ -220,25 +241,26 @@ export function renderCard({
 
     y += ROW;
 
-    /* Two columns, not three. At this width three would put the longest name
-       and its percentage past the right edge, and measuring to find out is not
-       available here - see the note at the top. */
-    const perRow = 2;
+    /* Three columns fit at this width; they did not at 460, which is the kind
+       of thing that has to be re-decided when the geometry moves rather than
+       scaled. Measuring to be sure is not available here - see the note at the
+       top - so the count is conservative for the longest plausible name. */
+    const perRow = 3;
     const columnWidth = (CARD_WIDTH - barX - PAD) / perRow;
     languages.forEach((language, index) => {
       const column = index % perRow;
       const line = Math.floor(index / perRow);
       const x = barX + column * columnWidth;
-      const lineY = y + line * 16;
+      const lineY = y + line * 21;
       const colour = hex(
         sampleRamp(RAMPS[ramp], rampPosition(index, languages.length)),
       );
       body.push(
-        `<rect x="${x}" y="${lineY - 7}" width="7" height="7" rx="1.5" fill="${colour}"/>`,
-        `<text x="${x + 12}" y="${lineY}" fill="${theme.muted}" font-size="${SIZE_SMALL}" font-family="${FONT}">${esc(language.name)} ${Math.round(language.share * 100)}%</text>`,
+        `<rect x="${x}" y="${lineY - 8}" width="8" height="8" rx="1.5" fill="${colour}"/>`,
+        `<text x="${x + 14}" y="${lineY}" fill="${theme.muted}" font-size="${SIZE_SMALL}" font-family="${FONT}">${esc(language.name)} ${Math.round(language.share * 100)}%</text>`,
       );
     });
-    y += Math.ceil(languages.length / perRow) * 16;
+    y += Math.ceil(languages.length / perRow) * 21;
   }
 
   const footerY = y + 8;
@@ -259,8 +281,8 @@ export function renderCard({
     </radialGradient>
   </defs>
 
-  <rect x="0.5" y="0.5" width="${CARD_WIDTH - 1}" height="${height - 1}" rx="9" fill="${theme.ground}" stroke="${theme.rule}"/>
-  ${BUTTONS.map((colour, index) => `<circle cx="${PAD + 5 + index * 14}" cy="${TITLE_BAR / 2}" r="4.5" fill="${colour}"/>`).join("\n  ")}
+  <rect x="0.5" y="0.5" width="${CARD_WIDTH - 1}" height="${height - 1}" rx="10" fill="${theme.ground}" stroke="${theme.rule}"/>
+  ${BUTTONS.map((colour, index) => `<circle cx="${PAD + 6 + index * 19}" cy="${TITLE_BAR / 2}" r="5.5" fill="${colour}"/>`).join("\n  ")}
   <text x="${CARD_WIDTH - PAD}" y="${TITLE_BAR / 2 + 3.5}" text-anchor="end" fill="${theme.faint}" font-size="${SIZE_TITLE}" font-family="${FONT}">${esc(`tone — stats · ${stamp}`)}</text>
   <line x1="${PAD}" y1="${TITLE_BAR}" x2="${CARD_WIDTH - PAD}" y2="${TITLE_BAR}" stroke="${theme.rule}"/>
 

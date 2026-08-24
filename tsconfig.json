@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    // DOM is here for the vendored files only. `field.ts` is a browser module
+    // and its worker-message types mention `ImageBitmap`; the half this
+    // repository calls - `renderField`, `renderGrainTile` - touches nothing
+    // outside a typed array, but TypeScript checks whole files, and `exclude`
+    // does not apply to a file reached through an import.
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "types": ["bun"],
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  // The vendored files are tonil's, checked by tonil. Type-checking them here
+  // would mean either editing them - which defeats the point of vendoring - or
+  // carrying tonil's exact compiler settings, which is a second thing to keep
+  // in sync for no benefit.
+  "exclude": ["node_modules", "scripts/lib/vendor"]
+}

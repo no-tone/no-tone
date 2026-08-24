@@ -1,0 +1,15 @@
+{
+  "name": "no-tone-profile",
+  "private": true,
+  "type": "module",
+  "description": "Generates the README, its banner and its stats card.",
+  "scripts": {
+    "generate": "bun run scripts/generate.ts",
+    "vendor": "bun run scripts/vendor.ts",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "typescript": "^5.9.3"
+  }
+}

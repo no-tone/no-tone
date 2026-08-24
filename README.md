@@ -1,16 +1,32 @@
 <div align="center">
 
-<a href="https://no-tone.com">
-  <img height="250" alt="Ascii Art" src="https://github.com/user-attachments/assets/018da184-6dc8-41d6-9bd9-6df186142462" />
+<!-- generated:start -->
+<a href="https://tone.rip">
+  <img alt="tone" src="assets/banner.png" width="100%">
 </a>
-  
-<hr>
+<!-- generated:end -->
 
-<!--
-[![Top Langs](https://github-readme-stats-nu-eight-50.vercel.app/api/top-langs/?username=no-tone&layout=compact&theme=nightowl&hide=mathematica&card_width=570&border_color=555555&bg_color=000000&text_color=6698fe)](https://no-tone.com)
--->
+</div>
 
-<sub><b>Note:</b> Some of my repos include university work, practical day-to-day tools, occasional hobby projects, and some AI testing.</sub>  
-<sub>Contact info, projects list and more at [no-tone.com](http://no-tone.com).</sub>
+<div align="center">
+
+**Software engineer.** Web applications end to end — the front-end, the API
+behind it, and the infrastructure both run on.
+
+[tone.rip](https://tone.rip) · [work](https://tone.rip/work) · [cv](https://tone.rip/cv) · `ssh cv.tone.rip`
+
+</div>
+
+---
+
+<div align="center">
+
+<sub>The banner is not a picture of my site's gradient — it *is* it. The same
+`renderField`, the same OKLCh ramp, run headlessly into a PNG. The card is the
+same window <code>ssh cv.tone.rip</code> draws, down to the greys.
+<a href="scripts/">Both are generated here</a>, weekly.</sub>
+
+<sub><b>Note:</b> Some of my repos include university work, practical
+day-to-day tools, occasional hobby projects, and some AI testing.</sub>
 
 </div>

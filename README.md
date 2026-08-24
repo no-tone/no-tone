@@ -2,12 +2,12 @@
 
 <!-- generated:start -->
 <a href="https://tone.rip">
-  <img alt="tone" src="assets/banner.png" width="100%">
+  <img alt="tone" src="assets/banner.png" width="820">
 </a>
 
 <picture>
   <source media="(prefers-color-scheme: light)" srcset="assets/stats-light.svg">
-  <img alt="15 public repos · 1 star · 0 followers" src="assets/stats-dark.svg" width="100%">
+  <img alt="15 public repos · 1 star · 0 followers" src="assets/stats-dark.svg" width="820">
 </picture>
 <!-- generated:end -->
 

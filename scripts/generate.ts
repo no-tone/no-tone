@@ -118,16 +118,32 @@ for (const dark of [true, false]) {
   }
 }
 
+/* A pixel width, not `width="100%"`.
+ *
+ * `100%` has no ceiling: on a wide window the profile column is wider than
+ * either image is meant to be, so the banner grows until it dominates the page
+ * and the card's type is scaled up past the size it was laid out at.
+ *
+ * A fixed width still shrinks on a phone, because GitHub's own README styles
+ * apply `max-width: 100%` to images - so this is a cap rather than a size.
+ * 820 sits just inside the profile column at desktop width, and the banner is
+ * authored at 1200 wide, which leaves it downscaling (sharp) rather than
+ * stretching on a high-density screen.
+ *
+ * Not `height`: these two have different aspect ratios, and matching their
+ * widths is what makes them line up as one stacked block. */
+const DISPLAY_WIDTH = 820;
+
 /* `<picture>` rather than a media query inside the SVG: GitHub proxies images
    and serves one cached response to everybody, so the choice has to be made by
    the reader's browser from the markup, not inside the file. */
 const block = `<a href="https://tone.rip">
-  <img alt="tone" src="assets/banner.png" width="100%">
+  <img alt="tone" src="assets/banner.png" width="${DISPLAY_WIDTH}">
 </a>
 
 <picture>
   <source media="(prefers-color-scheme: light)" srcset="assets/stats-light.svg">
-  <img alt="${plural(stats.repos, "public repo")} · ${plural(stats.stars, "star")} · ${plural(stats.followers, "follower")}" src="assets/stats-dark.svg" width="100%">
+  <img alt="${plural(stats.repos, "public repo")} · ${plural(stats.stars, "star")} · ${plural(stats.followers, "follower")}" src="assets/stats-dark.svg" width="${DISPLAY_WIDTH}">
 </picture>`;
 
 const readme = await Bun.file("README.md").text();

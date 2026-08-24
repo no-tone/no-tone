@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # The workflow pins actions/checkout and oven-sh/setup-bun by tag. A tag is
+  # a moving target, so this is the thing that actually keeps them current -
+  # and it is the higher-value of the two entries here, because these actions
+  # run in a job that holds a PAT and has `contents: write`.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Type definitions and the compiler, which is the whole of package.json.
+  # Nothing here is a runtime dependency: `bun run generate` uses Bun's
+  # standard library, three vendored files of maths, and a PNG writer built on
+  # node:zlib. Grouped because a TypeScript patch is never interesting on its
+  # own.
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+# Deliberately not covered: scripts/lib/vendor/.
+#
+# Those three files are copied source from no-tone/tonil, not a package, so no
+# ecosystem knows they exist and Dependabot will never raise a PR for them.
+# Their update path is `bun run vendor`, which refetches them from tonil's
+# main. If the site's palette changes and the banner stops matching it, that
+# is the command - not a version bump.

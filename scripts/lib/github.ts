@@ -316,9 +316,20 @@ export async function fetchStats(
   const counted = all.filter((repo) => !repo.fork && !repo.archived);
 
   const stars = counted.reduce((sum, repo) => sum + repo.stargazers_count, 0);
-  const [newest] = [...counted].sort((a, b) =>
-    b.pushed_at.localeCompare(a.pushed_at),
-  );
+
+  // The profile repository cannot be its own "latest activity".
+  //
+  // It is the one repo the refresh workflow commits to, every week, seconds
+  // before this runs - so it always wins a sort by `pushed_at`, and the row
+  // reads "no-tone · just now" forever. Which is true, and says nothing: the
+  // question the row answers is "what is he actually working on", and the
+  // answer can never be the thing that generated the card.
+  //
+  // Left in the language mix on purpose. The bot writes the commits; the code
+  // it commits is still code that was written here.
+  const [newest] = [...counted]
+    .filter((repo) => repo.name !== login)
+    .sort((a, b) => b.pushed_at.localeCompare(a.pushed_at));
 
   return {
     login,

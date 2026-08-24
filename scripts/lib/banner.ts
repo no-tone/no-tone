@@ -1,11 +1,11 @@
-/* The banner: the site's gradient field, with the wordmark stamped into it.
+/* The gradient field, as a PNG. Just the field - no wordmark, no vignette.
  *
  * Not a screenshot and not an approximation. `renderField` here is the same
  * function tone.rip runs in a Web Worker on every page load, given the same
  * ramp and the same tuning constants, so the colour is identical by
  * construction rather than by matching hex codes by eye.
  *
- * Three things are reproduced deliberately, because they are what makes the
+ * Two things are reproduced deliberately, because they are what makes the
  * field look like itself rather than like a gradient:
  *
  *   1. The upscale IS the softness. The site renders at a quarter of display
@@ -15,16 +15,24 @@
  *   2. Grain is a separate layer, at one noise pixel per output pixel. In the
  *      browser it is a tiled DOM element in `mix-blend-mode: overlay`; here
  *      it is composited directly, which is the same arithmetic.
- *   3. The wordmark goes on AFTER the upscale, so the field is soft and the
- *      mark is not. Stamping it before would blur the one element whose whole
- *      point is hard pixel edges.
+ *
+ * **Why the wordmark is not in here.** It used to be, stamped into the pixels
+ * after the upscale. Then the banner moved inside the stats card, which is an
+ * SVG, and an SVG can hold the mark as rectangles - so it does. The field is
+ * the one thing that genuinely has to be a raster (it is per-pixel noise); the
+ * mark is four letters of axis-aligned boxes whose entire point is hard edges,
+ * and as vector it stays sharp at any zoom and on any display density while
+ * the field underneath stays deliberately soft. See card.ts.
+ *
+ * That split is also what keeps the embedded image small: the field can be
+ * rendered at 1x, because soft is the intent, where a stamped wordmark would
+ * have forced 2x to avoid blurring the mark.
  */
 
 import { renderField } from "./vendor/field.js";
 import { renderGrainTile } from "./vendor/field.js";
 import { RAMPS, type RampId } from "./vendor/ramps.js";
 import { encodePng } from "./png.js";
-import { GLYPH_ROWS, wordCells } from "./wordmark.js";
 
 /* Lifted from noise-gradient.ts's DEFAULTS. Copied rather than imported
    because they live in the mount function's options, which is DOM-bound -
@@ -138,82 +146,5 @@ export function renderBanner(options: BannerOptions): Uint8Array {
     }
   }
 
-  stampWordmark(out, width, height);
   return encodePng(out, width, height);
-}
-
-/**
- * Draw `tone` into the buffer, as hard-edged rectangles.
- *
- * White at full opacity, with a soft dark halo underneath. The halo is not
- * decoration: the field travels from a deep shade to a bright one, so a white
- * mark that reads cleanly over the bottom of the ramp disappears into the top
- * of it. Darkening the field locally keeps one contrast ratio wherever the
- * mark happens to sit, which is the same reason the copied-badge chip in
- * site-footer.css puts a flat black layer under the field's own colours.
- */
-function stampWordmark(
-  target: Uint8ClampedArray,
-  width: number,
-  height: number,
-): void {
-  const { cells, cols, rows } = wordCells("tone");
-
-  // Sized off the height so the mark keeps its proportions whatever the
-  // banner is: the word occupies a bit under half the vertical space.
-  const pixel = Math.max(2, Math.round((height * 0.42) / GLYPH_ROWS));
-  const markWidth = cols * pixel;
-  const markHeight = rows * pixel;
-  const originX = Math.round((width - markWidth) / 2);
-  const originY = Math.round((height - markHeight) / 2);
-
-  // A falloff measured from the mark's centre, with no flat region anywhere.
-  //
-  // The first attempt measured distance from the mark's bounding *box* -
-  // `max(0, |x - cx| - w/2)` - which is zero for every pixel inside the box,
-  // so the whole box got one constant shade and the banner had a visible dark
-  // rectangle sitting behind the word. Distance from a point has no plateau,
-  // so the darkening peaks under the middle of the word and fades from there.
-  //
-  // The radii are generous multiples of the mark's own size: the halo has to
-  // be much larger than the thing it protects, or its edge becomes a shape of
-  // its own and you have traded a rectangle for an ellipse.
-  const centreX = originX + markWidth / 2;
-  const centreY = originY + markHeight / 2;
-  const radiusX = markWidth * 1.15;
-  const radiusY = markHeight * 2.2;
-  const STRENGTH = 0.5;
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const away = Math.hypot((x - centreX) / radiusX, (y - centreY) / radiusY);
-      if (away >= 1) continue;
-      // smoothstep, so it leaves the field at zero slope and there is no ring
-      // where the halo stops.
-      const t = 1 - away;
-      const shade = t * t * (3 - 2 * t) * STRENGTH;
-      const index = (y * width + x) * 4;
-      for (let channel = 0; channel < 3; channel++) {
-        target[index + channel] = Math.round(
-          target[index + channel]! * (1 - shade),
-        );
-      }
-    }
-  }
-
-  for (const { col, row } of cells) {
-    const x0 = originX + col * pixel;
-    const y0 = originY + row * pixel;
-    for (let y = y0; y < y0 + pixel; y++) {
-      if (y < 0 || y >= height) continue;
-      for (let x = x0; x < x0 + pixel; x++) {
-        if (x < 0 || x >= width) continue;
-        const index = (y * width + x) * 4;
-        target[index] = 255;
-        target[index + 1] = 255;
-        target[index + 2] = 255;
-        target[index + 3] = 255;
-      }
-    }
-  }
 }

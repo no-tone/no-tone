@@ -1,25 +1,24 @@
 /* Regenerate the profile: `bun run generate`.
  *
- * Writes three things and rewrites one section of README.md:
+ * Writes two files and rewrites one section of README.md:
  *
- *   assets/banner.png        the site's gradient field with the wordmark in it
- *   assets/stats-dark.svg    the ssh-cv window, holding live numbers
+ *   assets/stats-dark.svg    the ssh-cv window, holding live numbers, with the
+ *                            site's gradient field as a band inside it
  *   assets/stats-light.svg   the same, for a light-themed reader
  *
- * The banner is deterministic and the card is not, and that distinction is the
- * whole reason this is one script rather than two. A weekly job that rewrote a
- * 650 kB PNG every run would add a megabyte of git history a month for an
- * image that never changed a pixel; a weekly job that rewrites a 4 kB SVG adds
- * nothing anyone will notice. So the banner is only written when its bytes
- * actually differ - which is to say, when the palette or the wordmark changes
- * and somebody meant it.
+ * One image rather than a banner and a card, because a window with the field
+ * inside it is one object and two stacked images are two.
  *
- * Everything reports whether it changed, so the workflow can skip the commit
- * entirely on a quiet week.
+ * Nothing is written whose bytes have not changed. That matters more than it
+ * sounds: each of these carries the field as embedded base64, so a weekly job
+ * that rewrote them unconditionally would add a quarter of a megabyte of git
+ * history every week for an image that had not moved a pixel. The field is
+ * deterministic - same ramp, same noise, same output - so on a week where only
+ * the numbers moved, only the numbers are committed.
  */
 
 import { renderBanner } from "./lib/banner.js";
-import { renderCard } from "./lib/card.js";
+import { CARD_WIDTH, renderCard } from "./lib/card.js";
 import { fetchStats } from "./lib/github.js";
 import type { RampId } from "./lib/vendor/ramps.js";
 
@@ -31,7 +30,18 @@ const LOGIN = "no-tone";
    sample the same ramp, so they cannot disagree. */
 const RAMP: RampId = "glacier";
 
-const BANNER = { width: 1200, height: 320 } as const;
+/* The field is rendered to fit the band inside the card, at 1x.
+ *
+ * 1x rather than 2x because the field is deliberately soft - it is a
+ * quarter-scale render upscaled, with no blur filter anywhere - so there is no
+ * detail for a denser raster to preserve. It also keeps the base64 the card
+ * embeds down to about 120 kB instead of 430 kB, twice over (dark and light),
+ * which is the difference between a README that loads and one that does not.
+ *
+ * The wordmark is not in here; the card draws it as vectors, so the one
+ * element that does need to be sharp is not paying for the field's softness.
+ * These numbers must match card.ts's band. */
+const FIELD = { width: 432, height: 108 } as const;
 
 /** The alt text is a sentence a screen reader says, so "1 stars" is wrong. */
 function plural(count: number, noun: string): string {
@@ -102,49 +112,40 @@ console.log(
 
 const wrote: string[] = [];
 
-if (
-  await writeIfChanged(
-    "assets/banner.png",
-    renderBanner({ ...BANNER, ramp: RAMP }),
-  )
-) {
-  wrote.push("assets/banner.png");
-}
+/* Rendered once and embedded in both variants. The field does not change with
+   the colour scheme - it is the same photograph either way. */
+const field = renderBanner({ ...FIELD, ramp: RAMP });
 
 for (const dark of [true, false]) {
   const path = `assets/stats-${dark ? "dark" : "light"}.svg`;
-  if (await writeIfChanged(path, renderCard({ stats, ramp: RAMP, dark, now }))) {
+  if (
+    await writeIfChanged(
+      path,
+      renderCard({ stats, ramp: RAMP, dark, now, field }),
+    )
+  ) {
     wrote.push(path);
   }
 }
 
-/* A pixel width, not `width="100%"`.
+/* Displayed at its authored size, 1:1 - see CARD_WIDTH in card.ts.
  *
- * `100%` has no ceiling: on a wide window the profile column is wider than
- * either image is meant to be, so the banner grows until it dominates the page
- * and the card's type is scaled up past the size it was laid out at.
- *
- * A fixed width still shrinks on a phone, because GitHub's own README styles
- * apply `max-width: 100%` to images - so this is a cap rather than a size.
- * 820 sits just inside the profile column at desktop width, and the banner is
- * authored at 1200 wide, which leaves it downscaling (sharp) rather than
- * stretching on a high-density screen.
- *
- * Not `height`: these two have different aspect ratios, and matching their
- * widths is what makes them line up as one stacked block. */
-const DISPLAY_WIDTH = 820;
+ * A pixel width, never `width="100%"`: percent has no ceiling, so on a wide
+ * window the card stretched past the size its type was laid out at. A fixed
+ * width still shrinks on a phone, because GitHub's own README styles apply
+ * `max-width: 100%` to images - so this is a ceiling, not a size. */
+const DISPLAY_WIDTH = CARD_WIDTH;
 
-/* `<picture>` rather than a media query inside the SVG: GitHub proxies images
-   and serves one cached response to everybody, so the choice has to be made by
-   the reader's browser from the markup, not inside the file. */
+/* One image, linked to the site. `<picture>` rather than a media query inside
+   the SVG: GitHub proxies images and serves one cached response to everybody,
+   so the choice has to be made by the reader's browser from the markup, not
+   inside the file. */
 const block = `<a href="https://tone.rip">
-  <img alt="tone" src="assets/banner.png" width="${DISPLAY_WIDTH}">
-</a>
-
-<picture>
-  <source media="(prefers-color-scheme: light)" srcset="assets/stats-light.svg">
-  <img alt="${plural(stats.repos, "public repo")} · ${plural(stats.stars, "star")} · ${plural(stats.followers, "follower")}" src="assets/stats-dark.svg" width="${DISPLAY_WIDTH}">
-</picture>`;
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="assets/stats-light.svg">
+    <img alt="tone — ${plural(stats.repos, "public repo")} · ${plural(stats.stars, "star")} · ${plural(stats.followers, "follower")}" src="assets/stats-dark.svg" width="${DISPLAY_WIDTH}">
+  </picture>
+</a>`;
 
 const readme = await Bun.file("README.md").text();
 if (await writeIfChanged("README.md", spliceReadme(readme, block))) {

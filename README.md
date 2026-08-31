@@ -4,7 +4,7 @@
 <a href="https://tone.rip">
   <picture>
     <source media="(prefers-color-scheme: light)" srcset="assets/stats-light.svg">
-    <img alt="tone stats: 15 public repos · 1 star · 0 followers" src="assets/stats-dark.svg" width="700">
+    <img alt="tone stats: 16 public repos · 1 star · 0 followers" src="assets/stats-dark.svg" width="700">
   </picture>
 </a>
 <!-- generated:end -->

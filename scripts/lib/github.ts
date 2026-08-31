@@ -48,7 +48,7 @@ interface Repo {
 function headers(token?: string): Record<string, string> {
   return {
     Accept: "application/vnd.github+json",
-    "User-Agent": "no-tone-profile-generator",
+    "User-Agent": "riptone-profile-generator",
     "X-GitHub-Api-Version": "2022-11-28",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
@@ -173,7 +173,7 @@ async function fetchContributions(
 async function fetchSshCvVersion(token?: string): Promise<string | null> {
   try {
     const releases = await rest<{ tag_name: string }[]>(
-      "/repos/no-tone/tonil/releases?per_page=100",
+      "/repos/riptone/tonil/releases?per_page=100",
       token,
     );
     const tag = releases.find((release) =>
@@ -321,7 +321,7 @@ export async function fetchStats(
   //
   // It is the one repo the refresh workflow commits to, every week, seconds
   // before this runs - so it always wins a sort by `pushed_at`, and the row
-  // reads "no-tone · just now" forever. Which is true, and says nothing: the
+  // reads "riptone · just now" forever. Which is true, and says nothing: the
   // question the row answers is "what is he actually working on", and the
   // answer can never be the thing that generated the card.
   //

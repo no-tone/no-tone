@@ -22,7 +22,7 @@ import { CARD_WIDTH, FIELD_RENDER, renderCard } from "./lib/card.js";
 import { fetchStats } from "./lib/github.js";
 import type { RampId } from "./lib/vendor/ramps.js";
 
-const LOGIN = "no-tone";
+const LOGIN = "riptone";
 
 /* Glacier: deep sea to ice. The calmest of the set and the one built to sit
    behind text, which is what a banner with a wordmark on it is. Change this

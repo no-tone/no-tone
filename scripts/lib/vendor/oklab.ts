@@ -1,7 +1,7 @@
 /* Vendored from tonil - do not edit here.
  *
  * Source: packages/ui/src/gradient/oklab.ts
- *         https://raw.githubusercontent.com/no-tone/tonil/main/packages/ui/src/gradient/oklab.ts
+ *         https://raw.githubusercontent.com/riptone/tonil/main/packages/ui/src/gradient/oklab.ts
  *
  * Refresh with `bun run vendor`. Editing this copy instead means the banner
  * stops being the site's field and starts being a lookalike, which is the one

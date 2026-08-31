@@ -26,7 +26,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SOURCE =
-  "https://raw.githubusercontent.com/no-tone/tonil/main/packages/ui/src/gradient";
+  "https://raw.githubusercontent.com/riptone/tonil/main/packages/ui/src/gradient";
 
 /* field.ts imports from ramps.ts, ramps.ts from oklab.ts, oklab.ts from
    nothing. Fetched in that order so a partial failure leaves the tree in a

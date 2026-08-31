@@ -25,7 +25,7 @@ updates:
           - "patch"
 # Deliberately not covered: scripts/lib/vendor/.
 #
-# Those three files are copied source from no-tone/tonil, not a package, so no
+# Those three files are copied source from riptone/tonil, not a package, so no
 # ecosystem knows they exist and Dependabot will never raise a PR for them.
 # Their update path is `bun run vendor`, which refetches them from tonil's
 # main. If the site's palette changes and the banner stops matching it, that

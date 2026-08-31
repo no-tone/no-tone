@@ -6,9 +6,9 @@ short, and most of it is a redirect.
 
 ## If you found something in the site, the API, or the SSH CV
 
-Report it against **[no-tone/tonil](https://github.com/no-tone/tonil)**, which
+Report it against **[riptone/tonil](https://github.com/riptone/tonil)**, which
 is where that code lives, and follow
-[its policy](https://github.com/no-tone/tonil/blob/main/docs/SECURITY.md).
+[its policy](https://github.com/riptone/tonil/blob/main/docs/SECURITY.md).
 `tone.rip`, `api.tone.rip`, `dash.tone.rip` and `ssh cv.tone.rip` are all out
 of scope here.
 
